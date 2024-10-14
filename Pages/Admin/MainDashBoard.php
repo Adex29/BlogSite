@@ -31,7 +31,7 @@
                     </select>
                 </div>
                 <div class="ml-auto">
-                    <button class="btn btn-primary align-self-end" data-bs-toggle="modal" data-bs-target="#userModal">Create User</button>
+                    <button class="btn add-btn align-self-end" data-bs-toggle="modal" data-bs-target="#userModal">Create User</button>
                 </div>
             </div>
             <!-- <div class="row">
