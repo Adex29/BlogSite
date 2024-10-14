@@ -38,8 +38,7 @@ $(document).ready(function () {
         },
       },
     ],
-});
-
+  });
 
   $("#commentsTable").DataTable({
     columns: [
@@ -52,15 +51,61 @@ $(document).ready(function () {
     paging: false,
   });
 
+  // Initialize the posts DataTable
   $("#postsTable").DataTable({
-    columns: [
-      { title: "Title" },
-      { title: "Category" },
-      { title: "Status" },
-      { title: "Actions" },
-    ],
     searching: false,
     paging: false,
+    ajax: {
+      url: "../Actions/posts.php",
+      type: "POST",
+      data: { action: "getPosts" },
+      dataType: "json",
+      dataSrc: function (json) {
+        console.log(json);
+        return json;
+      },
+      error: function (xhr, error, thrown) {
+        console.log(xhr.responseText);
+      },
+    },
+    columns: [
+      { data: "title", title: "Title" },
+      { data: "category", title: "Category" },
+      {
+        data: null,
+        title: "Status",
+        render: function (data, type, row) {
+          let last_update;
+          if(row.updated_at){
+            last_update = row.updated_at;
+          }else{
+            last_update = row.created_at;
+          }
+
+          if (row.status === 'Published') {
+            return `<span class="badge bg-primary">Published</span>
+            <br>
+            <span">${last_update}</span>`;
+          } else {
+            return `<span class="badge bg-secondary">Draft</span>
+            <br>
+            <span">${last_update}</span>`;;
+          }
+        },
+      },
+      
+
+      {
+        data: null,
+        title: "Actions",
+        render: function (data, type, row) {
+          return `
+          <button class="btn btn-secondary mr-2 editPostBtn" data-post-id="${row.id}">Edit</button>
+          <button class="btn btn-danger ml-2 deletePostBtn" data-post-id="${row.id}">Delete</button>
+        `;
+        },
+      },
+    ],
   });
 
   $("#mediaTable").DataTable({
@@ -71,7 +116,23 @@ $(document).ready(function () {
 
   const quill = new Quill("#postContentContainer", {
     theme: "snow",
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["blockquote", "code-block"],
+        [{ script: "sub" }, { script: "super" }], // Superscript / subscript
+        [{ indent: "-1" }, { indent: "+1" }], // Indent
+        [{ direction: "rtl" }], // Text direction
+        [{ color: [] }, { background: [] }], // Dropdown with default and custom colors
+        [{ align: [] }],
+        ["link", "image", "video"], // Insert links, images, and videos
+        ["clean"], // Remove formatting
+      ],
+    },
   });
+  
 
   const $carousel = $("#carouselExampleSlidesOnly");
   const $nextBtn = $("#nextBtn");
