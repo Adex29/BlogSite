@@ -79,6 +79,33 @@ if(isset($_POST['action'])) {
         }
     }
 
+    if ($_POST['action'] == 'updateUser') {
+        try {
+            $userId = (int)$_POST['userId'];
+            $userData = $_POST['data'];
+    
+            $db = new DB();
+            $updateResult = $db->update('users', $userData, ['id' => $userId]);
+    
+            if ($updateResult) {
+                echo json_encode([
+                    "status" => "success",
+                    "message" => "User updated successfully"
+                ]);
+            } else {
+                echo json_encode([
+                    "status" => "error",
+                    "message" => "Failed to update user"
+                ]);
+            }
+        } catch (Exception $e) {
+            echo json_encode([
+                "status" => "error",
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
+
     
     
 

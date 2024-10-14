@@ -81,41 +81,42 @@
 
         
 
-        public function update($table,$data,$conditions){ 
-            if(!empty($data) && is_array($data))
-            { 
-                $colvalSet = ''; 
+        public function update($table, $data, $conditions) { 
+            if (!empty($data) && is_array($data)) { 
+                // Prepare SET clause
+                $colvalSet = []; 
                 $whereSql = ''; 
-                $i = 0; 
-                /*if(!array_key_exists('modified',$data))
-                { 
-                    $data['modified'] = date("Y-m-d H:i:s"); 
-                } */
-
-                foreach($data as $key=>$val){ 
-                    $pre = ($i > 0)?', ':''; 
-                    $colvalSet .= $pre.$key."='".$val."'"; 
-                    $i++; 
-                } 
-
-                if(!empty($conditions)&& is_array($conditions))
-                { 
+                $params = []; // Array for storing parameters for prepared statement
+        
+                // Check if 'modified' is not present and set it
+                if (!array_key_exists('updated_at', $data)) { 
+                    $data['updated_at'] = date("Y-m-d H:i:s"); 
+                }
+        
+                foreach ($data as $key => $val) { 
+                    $colvalSet[] = "$key = :$key"; // Use named placeholders
+                    $params[":$key"] = $val; // Store the actual value for binding
+                }
+        
+                if (!empty($conditions) && is_array($conditions)) { 
                     $whereSql .= ' WHERE '; 
                     $i = 0;
-
-                    foreach($conditions as $key => $value)
-                    { 
-                        $pre = ($i > 0)?' AND ':''; 
-                        $whereSql .= $pre.$key." = '".$value."'"; 
+        
+                    foreach ($conditions as $key => $value) { 
+                        $pre = ($i > 0) ? ' AND ' : ''; 
+                        $whereSql .= $pre . "$key = :cond_$key"; // Use named placeholders for conditions
+                        $params[":cond_$key"] = $value; // Store condition value for binding
                         $i++; 
                     } 
                 } 
-                $sql = "UPDATE ".$table." SET ".$colvalSet.$whereSql; 
+        
+                $sql = "UPDATE $table SET " . implode(', ', $colvalSet) . $whereSql; 
                 $query = $this->db->prepare($sql); 
-                $update = $query->execute(); 
-                return $update?$query->rowCount():false; 
-            }else
-            { 
+        
+                // Execute the query with bound parameters
+                $update = $query->execute($params); 
+                return $update ? $query->rowCount() : false; 
+            } else { 
                 return false; 
             } 
         } 
