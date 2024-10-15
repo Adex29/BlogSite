@@ -1,51 +1,82 @@
+document.addEventListener("DOMContentLoaded", function () {
+  
+})
+
+const endpoint = "../Actions/Posts.php";
+
+// Initialize Quill editor
+const postContent = new Quill("#postContentContainer", {
+  theme: "snow",
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["blockquote", "code-block"],
+      [{ script: "sub" }, { script: "super" }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ direction: "rtl" }],
+      [{ color: [] }, { background: [] }],
+      [{ align: [] }],
+      ["link", "image", "video"],
+      ["clean"],
+    ],
+  },
+});
+
 // Save the post
+
 $("#postForm").on("submit", function (event) {
-    event.preventDefault();
+  event.preventDefault();
+
+  var formData = new FormData(this);
+  formData.append("action", "savePost");
   
-    var formDataArray = $(this).serializeArray();
-    var formData = {};
+  // Get the content from Quill editor
+  const content = postContent.root.innerHTML;
   
-    formDataArray.forEach(function (item) {
-      formData[item.name] = item.value;
+  // Check if there's any content before appending
+  if (postContent.getLength() > 1) {
+    formData.append("content", content);
+  }
+  
+  try {
+    $.ajax({
+      type: "POST",
+      url: "../Actions/posts.php",
+      data: formData,
+      contentType: false, // Important to tell jQuery not to process the data
+      processData: false, // Important to tell jQuery not to convert the FormData object into a string
+      dataType: "json",
+      success: function (response) {
+        if (response.status === "success") {
+          var table = $("#postsTable").DataTable();
+          table.ajax.reload(null, false);
+
+          $("#alertContainer").html(`
+            <div class="alert alert-success alert-dismissible fade show position-absolute w-100" role="alert">
+              <strong>Success!</strong> ${response.message}. Post ID: ${response.postId}.
+            </div>
+          `);
+          setTimeout(function () {
+            $("#alertContainer").html("");
+          }, 3000);
+          $("#postModal").modal("hide");
+          $("#postForm")[0].reset();
+        } else {
+          console.error("Error: " + response.message);
+        }
+      },
+      error: function (data) {
+        console.error(data);
+      },
     });
-  
-    try {
-      $.ajax({
-        type: "POST",
-        url: "../Actions/dashBoard.php",
-        data: {
-          data: formData,
-          action: "savePost",
-        },
-        dataType: "json",
-        success: function (response) {
-          if (response.status === "success") {
-            var table = $("#postsTable").DataTable();
-            table.ajax.reload(null, false);
-  
-            // Display success alert
-            $("#alertContainer").html(`
-              <div class="alert alert-success alert-dismissible fade show position-absolute w-100" role="alert">
-                <strong>Success!</strong> ${response.message}. Post ID: ${response.postId}.
-              </div>
-            `);
-            setTimeout(function () {
-              $("#alertContainer").html("");
-            }, 3000);
-            $("#postModal").modal("hide");
-            $("#postForm")[0].reset();
-          } else {
-            console.error("Error: " + response.message);
-          }
-        },
-        error: function (data) {
-          console.error(data);
-        },
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+
   
   // Handle edit post
   $(document).on("click", ".editPostBtn", function () {
@@ -53,7 +84,7 @@ $("#postForm").on("submit", function (event) {
   
     $.ajax({
       type: "POST",
-      url: "../Actions/dashBoard.php",
+      url: endpoint,
       data: {
         action: "getPostById",
         postId: postId,
@@ -63,10 +94,12 @@ $("#postForm").on("submit", function (event) {
         if (response.status === "success") {
           const post = response.data[0];
   
-          $("#postTitle").val(post.title);
-          $("#postCategory").val(post.category);
-          $("#postContent").val(post.summary);
-          $("#postStatus").val(post.status);
+          $("#title").val(post.title);
+          $("#category").val(post.category);
+          $("#content").val(post.summary);
+          $("#status").val(post.status);
+          $("#summary").val(post.summary);
+          postContent.root.innerHTML = post.content;
   
           $("#postModalLabel").text("Edit Post");
           $("#savePostBtn").hide();
@@ -86,31 +119,32 @@ $("#postForm").on("submit", function (event) {
     });
   });
   
-  // Update post
   $(document).on("click", "#updatePostBtn", function () {
     const postId = $(this).data("post-id");
   
-    const formDataArray = $("#postForm").serializeArray();
-    let formData = {};
+    let formData = new FormData($("#postForm")[0]); 
+    formData.append("action", "updatePost");
+    formData.append("postId", postId);
   
-    formDataArray.forEach(function (item) {
-      formData[item.name] = item.value;
-    });
+    const content = postContent.root.innerHTML;
+    if (postContent.getLength() > 1) {
+      formData.append("content", content);
+    }
   
     $.ajax({
       type: "POST",
-      url: "../Actions/dashBoard.php",
-      data: {
-        action: "updatePost",
-        postId: postId,
-        data: formData,
-      },
+      url: endpoint,
+      data: formData,
+      contentType: false, // Prevent jQuery from automatically setting the content type
+      processData: false, // Prevent jQuery from processing the data into a query string
       dataType: "json",
       success: function (response) {
         if (response.status === "success") {
+          // Reload the table with updated data
           var table = $("#postsTable").DataTable();
           table.ajax.reload(null, false);
   
+          // Display success message
           $("#alertContainer").html(`
             <div class="alert alert-success alert-dismissible fade show" role="alert">
               <strong>Success!</strong> ${response.message}.
@@ -118,10 +152,12 @@ $("#postForm").on("submit", function (event) {
             </div>
           `);
   
+          // Clear the alert after a few seconds
           setTimeout(function () {
             $("#alertContainer").html("");
           }, 3000);
   
+          // Close the modal and reset the form
           $("#postModal").modal("hide");
           $("#postForm")[0].reset();
         } else {
@@ -134,18 +170,19 @@ $("#postForm").on("submit", function (event) {
     });
   });
   
+  
   // Handle delete post
   let postIdToDelete = null;
   $(document).on("click", ".deletePostBtn", function () {
     postIdToDelete = $(this).data("post-id");
-    $("#deleteConfirmationModal").modal("show");
+    $("#deletePostConfirmationModal").modal("show");
   });
   
-  $(document).on("click", "#confirmDeleteBtn", function () {
+  $(document).on("click", "#confirmDeletePostBtn", function () {
     if (postIdToDelete) {
       $.ajax({
         type: "POST",
-        url: "../Actions/dashBoard.php",
+        url: endpoint,
         data: {
           action: "deletePost",
           postId: postIdToDelete,
@@ -172,7 +209,7 @@ $("#postForm").on("submit", function (event) {
           console.error(errorData.responseText);
         },
       });
-      $("#deleteConfirmationModal").modal("hide");
+      $("#deletePostConfirmationModal").modal("hide");
     }
   });
   
@@ -182,5 +219,6 @@ $("#postForm").on("submit", function (event) {
     $("#postModalLabel").text("Create Post");
     $("#savePostBtn").css("display", "block");
     $("#updateBtnContainer").html("");
+    postContent.setText('');
   });
   

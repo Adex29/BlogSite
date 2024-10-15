@@ -55,6 +55,8 @@ $(document).ready(function () {
   $("#postsTable").DataTable({
     searching: false,
     paging: false,
+    scrollY: "400px",
+    scrollCollapse: true,
     ajax: {
       url: "../Actions/posts.php",
       type: "POST",
@@ -82,14 +84,20 @@ $(document).ready(function () {
             last_update = row.created_at;
           }
 
-          if (row.status === 'Published') {
-            return `<span class="badge bg-primary">Published</span>
-            <br>
-            <span">${last_update}</span>`;
+          if (row.status === 'published') {
+            return `
+              <span class="badge bg-primary">Published</span>
+              <span>Jay-ar Baniqued</span>
+              <br>
+              <span">${last_update}</span>
+            `;
           } else {
-            return `<span class="badge bg-secondary">Draft</span>
-            <br>
-            <span">${last_update}</span>`;;
+            return `
+              <span class="badge bg-secondary">Draft</span>
+              <span>Jay-ar Baniqued</span>
+              <br>
+              <span">${last_update}</span>
+            `;
           }
         },
       },
@@ -114,26 +122,6 @@ $(document).ready(function () {
     paging: false,
   });
 
-  const quill = new Quill("#postContentContainer", {
-    theme: "snow",
-    modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline", "strike"],
-        [{ list: "ordered" }, { list: "bullet" }],
-        ["blockquote", "code-block"],
-        [{ script: "sub" }, { script: "super" }], // Superscript / subscript
-        [{ indent: "-1" }, { indent: "+1" }], // Indent
-        [{ direction: "rtl" }], // Text direction
-        [{ color: [] }, { background: [] }], // Dropdown with default and custom colors
-        [{ align: [] }],
-        ["link", "image", "video"], // Insert links, images, and videos
-        ["clean"], // Remove formatting
-      ],
-    },
-  });
-  
-
   const $carousel = $("#carouselExampleSlidesOnly");
   const $nextBtn = $("#nextBtn");
   const $prevBtn = $("#prevBtn");
@@ -143,23 +131,37 @@ $(document).ready(function () {
   let currentIndex = 0;
   const totalItems = $carouselItems.length;
 
-  // Add event listener to the carousel to track the active item
+  // Initialize the carousel with interval set to false to stop auto sliding
+  $carousel.carousel({
+    interval: false, // Disable auto-slide
+  });
+
+  // Add event listener to track the active item after a manual slide
   $carousel.on("slid.bs.carousel", function () {
     currentIndex = $carouselItems.index($carouselItems.filter(".active"));
     updateButtons();
   });
 
+  // Click event for "Next" button
+  $nextBtn.on("click", function () {
+    $carousel.carousel("next");
+  });
+
+  // Click event for "Prev" button
+  $prevBtn.on("click", function () {
+    $carousel.carousel("prev");
+  });
+
+  // Function to update buttons based on the current index
   function updateButtons() {
-    // Show or hide buttons based on the active slide
     if (currentIndex === totalItems - 1) {
-      $nextBtn.addClass("d-none"); // Hide "Next" button
+      $nextBtn.addClass("d-none"); // Hide "Next" button on the last slide
       $savePostBtn.removeClass("d-none"); // Show "Save Post" button
     } else {
       $nextBtn.removeClass("d-none"); // Show "Next" button
       $savePostBtn.addClass("d-none"); // Hide "Save Post" button
     }
 
-    // Show "Prev" button only if we're not on the first slide
     if (currentIndex === 0) {
       $prevBtn.addClass("d-none"); // Hide "Prev" button on the first slide
     } else {
@@ -167,5 +169,6 @@ $(document).ready(function () {
     }
   }
 
+  // Initialize the button states on page load
   updateButtons();
 });

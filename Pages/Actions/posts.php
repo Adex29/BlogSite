@@ -6,11 +6,26 @@ if (isset($_POST['action'])) {
     // Save a new post
     if ($_POST['action'] == 'savePost') {
         try {
-            $postData = $_POST['data'];
+            $postData = [
+                'title' => $_POST['title'],
+                'category' => $_POST['category'],
+                'summary' => $_POST['summary'],
+                'status' => $_POST['status'],
+                'content'  => $_POST['content']
+            ];
+    
+            if (!empty($_FILES['img']['name'])) {
+                $imageName = $_FILES['img']['name'];
+                $imageTmpName = $_FILES['img']['tmp_name'];
+                $imagePath = '../images/' . $imageName;
+                move_uploaded_file($imageTmpName, $imagePath);
+    
+                $postData['img'] = $imagePath;
+            }
+    
             $db = new DB();
             $newPost = $db->insert('posts', $postData);
-
-            // Return success response with the new post ID
+ 
             if ($newPost) {
                 echo json_encode([
                     "status" => "success",
@@ -24,10 +39,10 @@ if (isset($_POST['action'])) {
                 ]);
             }
         } catch (Exception $e) {
-            // Handle any exceptions and return an error message
             echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
     }
+    
 
     // Get all posts
     if ($_POST['action'] == 'getPosts') {
@@ -89,11 +104,35 @@ if (isset($_POST['action'])) {
     if ($_POST['action'] == 'updatePost') {
         try {
             $postId = (int)$_POST['postId'];
-            $postData = $_POST['data'];
-
+    
+            // If data is sent in a nested format, retrieve it
+            if (isset($_POST['data'])) {
+                $postData = $_POST['data']; // This assumes that the form data is serialized into 'data'
+            } else {
+                // If the data is flat, just pull the individual fields from $_POST
+                $postData = [
+                    'title' => $_POST['title'],
+                    'category' => $_POST['category'],
+                    'summary' => $_POST['summary'],
+                    'status' => $_POST['status'],
+                    'content' => $_POST['content'],
+                ];
+            }
+    
+            // Handle image if it's part of the update
+            if (!empty($_FILES['img']['name'])) {
+                $imageName = $_FILES['img']['name'];
+                $imageTmpName = $_FILES['img']['tmp_name'];
+                $imagePath = '../images/' . $imageName;
+                move_uploaded_file($imageTmpName, $imagePath);
+    
+                $postData['img'] = $imagePath; // Add image path to the post data for updating
+            }
+    
+            // Update the post in the database
             $db = new DB();
             $updateResult = $db->update('posts', $postData, ['id' => $postId]);
-
+    
             if ($updateResult) {
                 echo json_encode([
                     "status" => "success",
@@ -112,4 +151,5 @@ if (isset($_POST['action'])) {
             ]);
         }
     }
+    
 }

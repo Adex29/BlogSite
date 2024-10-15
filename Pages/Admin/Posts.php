@@ -52,37 +52,41 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="carouselExampleSlidesOnly" class="carousel slide">
+                    <div id="carouselExampleSlidesOnly" class="carousel slide" data-interval="false">
                         <div class="carousel-inner">
-                            <div class="carousel-item active">
+                            <div class="carousel-item active" style="height: 500px;">
                                 <div class="mb-3">
-                                    <label for="postTitle" class="form-label">Title</label>
-                                    <input type="text" class="form-control" id="postTitle">
+                                    <label for="title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="title" name="title" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="postCategory" class="form-label">Category</label>
-                                    <select class="form-select" name="postCategory" id="postCategory">
+                                    <label for="category" class="form-label">Category</label>
+                                    <select class="form-select" name="category" id="category" required>
                                         <option value="news">News</option>
                                         <option value="updates">Updates</option>
                                         <option value="events">Events</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="postContent" class="form-label">Summary</label>
-                                    <textarea class="form-control" id="postContent"></textarea>
+                                    <label for="summary" class="form-label">Summary</label>
+                                    <textarea class="form-control" id="summary" name="summary" required></textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="postStatus" class="form-label">Status</label>
-                                    <select class="form-select" name="postStatus" id="postStatus">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" name="status" id="status" required>
                                         <option value="published">Published</option>
                                         <option value="draft">Draft</option>
                                     </select>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="img" class="form-label">Image</label>
+                                    <input type="file" class="form-control" id="img" name="img">
+                                </div>
                             </div>
-                            <div class="carousel-item">
+                            <div class="carousel-item" style="height: 500px;">
                                 <div id="postContentContainer">
-                                    <!-- Your content for the next slide -->
-                                    <p>Additional post content goes here.</p>
+                                    <label for="content" class="form-label">Content</label>
+                                    <textarea class="form-control" id="content" name="content" required></textarea>
                                 </div>
                             </div>
                         </div>
@@ -93,15 +97,18 @@
                     <button class="btn btn-secondary" type="button" id="prevBtn" data-bs-target="#carouselExampleSlidesOnly" data-bs-slide="prev" style="visibility: visible;">
                         < Prev
                     </button>
+                    
                     <button class="btn btn-secondary" type="button" id="nextBtn" data-bs-target="#carouselExampleSlidesOnly" data-bs-slide="next" style="visibility: visible;">
                         Next >
                     </button>
-                    <button type="button" class="btn btn-success d-none" id="savePostBtn">Save Post</button>
+                    <button type="submit" class="btn btn-success d-none" id="savePostBtn">Save Post</button>
+                    <div id=updateBtnContainer></div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 
 <!-- Delete Confirmation Modal for Posts -->
 <div class="modal fade" id="deletePostConfirmationModal" tabindex="-1" aria-labelledby="deletePostConfirmationModalLabel" aria-hidden="true">
