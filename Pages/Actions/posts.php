@@ -51,7 +51,10 @@ if (isset($_POST['action'])) {
             $posts = $db->getRows('posts', []);
             echo json_encode($posts);
         } catch (Exception $e) {
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            echo json_encode([
+                "status" => "error",
+                "message" => $e->getMessage()
+            ]);
         }
     }
 
