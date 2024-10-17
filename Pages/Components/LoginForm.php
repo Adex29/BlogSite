@@ -4,7 +4,7 @@
             <div class="col-6">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Login</h4>  
+                        <h4 class="card-title">Login</h4>
                         <form id="loginForm" method="post">
                             <div class="form-group">
                                 <label for="email">Email</label>
@@ -18,6 +18,9 @@
                                 <button type="submit" class="btn btn-primary">Login</button>
                             </div>
                         </form>
+                        <div class="form-group text-center mt-3">
+                            <a href="../User/SignUp.php" class="btn btn-secondary">Sign Up</a>
+                        </div>
                     </div>
                 </div>
             </div>

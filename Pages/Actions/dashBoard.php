@@ -3,33 +3,33 @@
 
 include_once("../database/DB.class.php");
 
-if(isset($_POST['action'])) {
-    if($_POST['action'] == 'saveUser') {
-        try {
+    if(isset($_POST['action'])) {
+        if($_POST['action'] == 'saveUser') {
+            try {
 
-            $userData = $_POST['data'];
-            $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
-        
-            $db = new DB();
-            $newUser = $db->insert('users', $userData);
+                $userData = $_POST['data'];
+                $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
+            
+                $db = new DB();
+                $newUser = $db->insert('users', $userData);
 
-            if ($newUser) {
-                echo json_encode([
-                    "status" => "success",
-                    "message" => "User saved successfully",
-                    "userId" => $newUser
-                ]);
-            } else {
-                echo json_encode([
-                    "status" => "error",
-                    "message" => "Failed to save user"
-                ]);
+                if ($newUser) {
+                    echo json_encode([
+                        "status" => "success",
+                        "message" => "User saved successfully",
+                        "userId" => $newUser
+                    ]);
+                } else {
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "Failed to save user"
+                    ]);
+                }
+            } catch (Exception $e) {
+                // Handle any exceptions and return an error message
+                echo json_encode(["status" => "error", "message" => $e->getMessage()]);
             }
-        } catch (Exception $e) {
-            // Handle any exceptions and return an error message
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
-    }
 
     if($_POST['action'] == 'getUsers') {
         try {
