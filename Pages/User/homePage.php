@@ -1,5 +1,9 @@
 <?php include_once("../Components/UserHeader.php"); ?>
 <?php include_once("../Components/UserNavbar.php"); ?>
+<?php 
+    session_start();
+    $_SESSION['isLoggedIn'] = true;
+?>
 <div class="wrapper">
     <div class="md:flex md:items-start">
         <div class=" md:w-4/5">
@@ -95,6 +99,45 @@
 
     </div>
 </div>
+
+
+
+
+<dialog id="CommentsModal" class="modal">
+  <div class="modal-box">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    <h3 class="text-lg font-bold mb-3">Comments</h3>
+    <div class="flex flex-col w-3/4" id="commentsContainer">
+        <div class="outline outline-1 outline-gray-300 inline-block rounded-full px-5 py-3 my-2">
+            <p class="block"><strong>Jay-ar Baniqued</strong></p>
+            <p class="block">This is good jsdnfjkdsfnkdn sjdn.</p>
+        </div>
+        <div class="outline outline-1 outline-gray-300 inline-block rounded-full px-5 py-3 my-2">
+            <p class="block"><strong>Jay-ar Baniqued</strong></p>
+            <p class="block">This is good jsdnfjkdsfnkdn sjdn.</p>
+        </div>
+        <div class="outline outline-1 outline-gray-300 inline-block rounded-full px-5 py-3 my-2">
+            <p class="block"><strong>Jay-ar Baniqued</strong></p>
+            <p class="block">This is good jsdnfjkdsfnkdn sjdn.</p>
+        </div>
+    </div>
+    <div class="w-full mt-5">
+    <hr class="mb-3">
+    <form id="commentForm" onsubmit="event.preventDefault(); addComment();">
+        <div class="flex">
+            <input class="input input-bordered w-full" type="text" placeholder="Write a comment" name="commentOnPost" id="commentOnPost"> <!-- Corrected spelling -->
+            <button type="submit" class="btn pl-5">Post</button>
+        </div>
+    </form>
+</div>
+
+  </div>
+</dialog>
+
+
+
 <?php include_once("../Components/userFooter.php"); ?>
 <?php include_once("../Components/Footer.php"); ?>
 <script src="../js/home.js"></script>

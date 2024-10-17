@@ -1,4 +1,6 @@
 <?php
+
+
 include_once("../database/DB.class.php");
 
 if(isset($_POST['action'])) {
@@ -6,6 +8,8 @@ if(isset($_POST['action'])) {
         try {
 
             $userData = $_POST['data'];
+            $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
+        
             $db = new DB();
             $newUser = $db->insert('users', $userData);
 

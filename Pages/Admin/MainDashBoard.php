@@ -1,3 +1,4 @@
+<?php include_once("../Actions/session.php"); ?>
 <?php include_once("../Components/Header.php"); ?>
 
 <div class="d-flex">
@@ -58,26 +59,26 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="first_name" class="form-label">First Name</label>
-                        <input type="text" class="form-control" id="first_name" name="first_name">
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
                     </div>
                     <div class="mb-3">
                         <label for="last_name" class="form-label">Last Name</label>
-                        <input type="text" class="form-control" id="last_name" name="last_name">
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
                     </div>
                     <div class="mb-3">
                         <label for="role" class="form-label">Role</label>
-                        <select class="form-select" name="role" id="role">
+                        <select class="form-select" name="role" id="role" required>
                             <option value="admin">Admin</option>
                             <option value="user">User</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email">
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password">
+                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
                 </div>
                 <div class="modal-footer">

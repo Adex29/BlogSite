@@ -154,5 +154,18 @@ if (isset($_POST['action'])) {
             ]);
         }
     }
+
+    if ($_POST['action'] == 'getPostsLikesComments') {
+        try {
+            $db = new DB();
+            $posts = $db->getPostLikesComments('posts', []);
+            echo json_encode($posts);
+        } catch (Exception $e) {
+            echo json_encode([
+                "status" => "error",
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
     
 }
