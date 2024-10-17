@@ -13,7 +13,6 @@ if(isset($_POST['action'])) {
             $db = new DB();
             $newUser = $db->insert('users', $userData);
 
-            // Return success response with the new user ID
             if ($newUser) {
                 echo json_encode([
                     "status" => "success",

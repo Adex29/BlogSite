@@ -2,7 +2,6 @@
 <?php include_once("../Components/UserNavbar.php"); ?>
 <?php 
     session_start();
-    $_SESSION['isLoggedIn'] = true;
 ?>
 <div class="wrapper">
     <div class="md:flex md:items-start">
@@ -89,13 +88,17 @@
             <h1 class="text-3xl font-bold ml-3">Recent Posts</h1>
             <div>
                 <div class="md:px-3 md:py-1">
-                    <h1 class="text-lg my-3">Ang pulis sa tulay nadapa</h1>
-                    <h1 class="text-lg my-3">Ang pulis sa tulay nadapa</h1>
-                    <h1 class="text-lg my-3">Ang pulis sa tulay nadapa</h1>
-                    <h1 class="text-lg my-3">Ang pulis sa tulay nadapa</h1>
+                    <div class="flex">
+                        <input id="searchPost" class="input" type="text" placeholder="Search posts...">
+                        <button id="searchPostBtn" class="btn">Search</button>
+                    </div>
+                    <div id="recentPosts">
+                        <!-- Recent posts will be appended here -->
+                    </div>
                 </div>
             </div>
         </div>
+
 
     </div>
 </div>

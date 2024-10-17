@@ -24,10 +24,10 @@
                     <span class="text-white nav-text">Comments</span>
                 </a>
             </div>
-            <div class="nav-item p-3 nav-hover">
-                <a href="../Admin/MediaLibrary.php" class="d-flex align-items-center">
+            <div id="adminLogout" class="nav-item p-3 nav-hover">
+                <a href="../Components/logout.php" class="d-flex align-items-center">
                     <i class="fas fa-images p-2 text-white nav-icon"></i>
-                    <span class="text-white nav-text">Media Library</span>
+                    <span class="text-white nav-text">Logout</span>
                 </a>
             </div>
         </div>

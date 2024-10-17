@@ -9,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $email = $_POST['email'];
         $password = $_POST['password'];
 
-        // Check if username and password are not empty
         if (empty($email) || empty($password)) {
             echo json_encode([
                 "status" => "error",
@@ -25,41 +24,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($user) {
             $hashedPassword = $user[0]['password'];
 
-            // Verify the password against the hashed password
             if (password_verify($password, $hashedPassword)) {
-                // Set session variables
-                $_SESSION['loggedIn'] = true;
-                $_SESSION['userId'] = $user[0]['id']; // Storing user ID in session
+
+                if ($user[0]['role'] == 'admin') {
+                    $_SESSION['loggedIn'] = true;
+                    $_SESSION['userId'] = $user[0]['id'];
+                    $_SESSION['name'] = $user[0]['first_name'] ." ". $user[0]['last_name'];
+                    
+                    echo json_encode([
+                        "status" => "success",
+                        "message" => "Authentication successful",
+                        "userId" => $user[0]['id'],
+                        "redirectUrl" => "../Admin/MainDashboard.php",
+                        "name" => $_SESSION['name']
+                    ]);
+                } else{
+                    $_SESSION['loggedIn'] = true;
+                    $_SESSION['userId'] = $user[0]['id'];
+                    
+                    echo json_encode([
+                        "status" => "success",
+                        "message" => "Authentication successful",
+                        "userId" => $user[0]['id'],
+                        "redirectUrl" => "../User/homePage.php"
+                    ]);
+                }
                 
-                echo json_encode([
-                    "status" => "success",
-                    "message" => "Authentication successful",
-                    "userId" => $user[0]['id'],  // or any other user data you want to return
-                    "redirectUrl" => "../Admin/MainDashboard.php" // Redirect URL on success
-                ]);
             } else {
-                // Password is incorrect; return an error response
                 echo json_encode([
                     "status" => "error",
                     "message" => "Invalid username or password",
                 ]);
             }
         } else {
-            // User not found; return an error response
             echo json_encode([
                 "status" => "error",
                 "message" => "User not found",
             ]);
         }
     } catch (Exception $e) {
-        // Handle any exceptions and return an error message
         echo json_encode([
             "status" => "error",
             "message" => "An error occurred: " . $e->getMessage()
         ]);
     }
 } else {
-    // Handle incorrect request method or missing action
     echo json_encode([
         "status" => "error",
         "message" => "Invalid request."

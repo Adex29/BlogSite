@@ -1,6 +1,9 @@
 <?php
 include_once("../database/DB.class.php");
 
+
+session_start();
+
 if (isset($_POST['action'])) {
     
     // Save a new post
@@ -11,7 +14,8 @@ if (isset($_POST['action'])) {
                 'category' => $_POST['category'],
                 'summary' => $_POST['summary'],
                 'status' => $_POST['status'],
-                'content'  => $_POST['content']
+                'content'  => $_POST['content'],
+                'author'  => $_SESSION['name']
             ];
     
             if (!empty($_FILES['img']['name'])) {
@@ -57,6 +61,21 @@ if (isset($_POST['action'])) {
             ]);
         }
     }
+
+    // Search posts
+    if ($_POST['action'] == 'searchPosts') {
+        try {
+            $db = new DB();
+            $posts = $db->searchPost('posts', ['title' => $_POST['value']]);
+            echo json_encode($posts);
+        } catch (Exception $e) {
+            echo json_encode([
+                "status" => "error",
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
+    
 
     // Delete a post
     if ($_POST['action'] == 'deletePost') {

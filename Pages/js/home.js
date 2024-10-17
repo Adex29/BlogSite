@@ -1,37 +1,30 @@
 document.addEventListener("DOMContentLoaded", function () {
   fetchPosts();
-  checkSessionStatus();
 });
 
-var isLoggedIn = false;
-
-function checkSessionStatus() {
+function checkSessionStatus(callback) {
   $.ajax({
-    url: '../Actions/session.php',
-    type: 'POST',
-    dataType: 'json',
+    url: "../Components/getSession.php",
+    type: "POST",
+    dataType: "json",
     data: {
-      action: 'getSession',
+      action: "getSession",
     },
     success: function (data) {
       if (data.isLoggedIn) {
         console.log("User is logged in.");
-        console.log("Email:", data.email);
-        isLoggedIn = true;
+        callback(true);
       } else {
         console.log("User is not logged in.");
-        isLoggedIn = false;
+        callback(false);
       }
     },
     error: function (xhr, status, error) {
-      console.error('Error:', error);
-    }
+      console.error("Error:", error);
+      callback(false); // Pass false to callback on error
+    },
   });
 }
-
-
-
-console.log(isLoggedIn);
 
 function fetchPosts() {
   $.ajax({
@@ -54,108 +47,170 @@ function fetchPosts() {
   });
 }
 
-function displayPosts(posts) {
-  const postsContainer = document.getElementById("postsContainer");
-  postsContainer.innerHTML = '';
+$("#searchPost").keyup(function () {
+  var search = $(this).val();
+  if (search != "") {
+    $.ajax({
+      url: "../Actions/posts.php",
+      method: "POST",
+      data: {
+        action: "searchPosts",
+        value: search,
+      },
+      success: function (result) {
+        const posts = JSON.parse(result);
+        displayRecent(posts);
+      },
+      error: function (error) {
+        console.error("Error fetching posts:", error);
+      },
+    });
+  } else {
+    loadPosts();
+  }
+});
 
+function loadPosts() {
+  $.ajax({
+    url: "../Actions/posts.php",
+    method: "POST",
+    data: {
+      action: "getPostsLikesComments",
+    },
+    success: function (result) {
+      const posts = JSON.parse(result);
+      displayRecent(posts);
+    },
+    error: function (error) {
+      alert("Something went wrong.");
+    },
+  });
+}
 
-  
-  
+function displayRecent(posts) {
+  const postsContainer = $("#recentPosts");
+  postsContainer.empty();
+
+  if (posts.length === 0) {
+    postsContainer.append("<p>No posts found.</p>");
+  }
 
   posts.forEach((post) => {
     if (post.status === "published") {
-      let postDiv = document.createElement("div"); // Create a new div for each post
+      const postDiv = $("<div></div>");
 
-      postDiv.innerHTML = `
-              <div class="md:flex">
-                  <div class="w-full md:w-64 h-64 flex-shrink-0">
-                      <img src="${post.img}" alt="" class="w-full h-full object-cover">
-                  </div>
-                  <div>
-                      <div class="md:px-3">
-                          <div class="badge badge-ghost p-3">${post.category}</div>
-                      </div>
-                      <div class="md:px-3 md:py-1">
-                          <h1 class="text-3xl font-bold">${post.title}</h1>
-                      </div>
-                      <div class="flex md:px-3">
-                          <h1 class="text-sm">Jay-ar Baniqued</h1>
-                          <h1 class="text-sm font-bold px-3">.</h1>
-                          <h1 class="text-sm">Oct 24, 2024</h1>
-                      </div>
-                      <div class="md:px-3 md:py-1">
-                          <h1 class="text-lg">${post.summary}</h1>
-                      </div>
-                      <div class="md:px-3 md:py-1">
-                          
+      const postLink = $("<a></a>")
+        .attr("href", `blogPage.php?postId=${post.post_id}`)
+        .html(`<h1 class="text-lg my-3">${post.title}</h1>`)
+        .attr("aria-label", `Read more about ${post.title}`);
 
-                            <button class="btn">Likes
-                                <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                                <div class="badge">${post.total_likes}</div>
-                            </button>
-                          
-                            <button class="btn" onclick="getComments(${post.post_id})">
-                                Comments
-                                <i class="fa fa-comments" aria-hidden="true"></i>
-                                <div class="badge">${post.total_comments}</div>
-                            </button>
-              
-                          
-                   
-                          
-                          <button onclick="goToPost(${post.post_id})" class="btn">
-                              Read More
-                              <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                          </button>
-                          <button onclick="copyToClipboard(${post.post_id})" class="btn">
-                              Share
-                              <i class="fa fa-share" aria-hidden="true"></i>
-                          </button>
-                      </div>
-                  </div>
-              </div>
-              <hr class="my-3">
-            `;
-      postsContainer.appendChild(postDiv); // Append the new div to the container
+      postDiv.append(postLink);
+      postsContainer.append(postDiv);
     }
   });
 }
 
+$(document).ready(function () {
+  loadPosts();
+});
 
-function getComments(post_id) {
+function displayPosts(posts) {
+  const postsContainer = document.getElementById("postsContainer");
+  postsContainer.innerHTML = "";
 
-  CommentsModal.showModal();
-  
+  checkSessionStatus((isLoggedIn) => {
+    posts.forEach((post) => {
+      if (post.status === "published") {
+        let postDiv = document.createElement("div");
 
-  $.ajax({
-      type: "POST",
-      url: "../Actions/comments.php",
-      data: {
-          action: "getComments",
-          post_id: post_id,
-      },
-      dataType: "json",
-      success: function (data) {
-          if (data.status === "success") {
-              displayComments(data.comments);
-          } else {
-              console.error("Error: " + data.message);
-          }
-      },
-      error: function (errorData) {
-          console.error(errorData);
-      },
+        postDiv.innerHTML = `
+          <div class="md:flex">
+              <div class="w-full md:w-64 h-64 flex-shrink-0">
+                  <img src="${post.img}" alt="" class="w-full h-full object-cover">
+              </div>
+              <div>
+                  <div class="md:px-3">
+                      <div class="badge badge-ghost p-3">${post.category}</div>
+                  </div>
+                  <div class="md:px-3 md:py-1">
+                      <h1 class="text-3xl font-bold">${post.title}</h1>
+                  </div>
+                  <div class="flex md:px-3">
+                      <h1 class="text-sm">Jay-ar Baniqued</h1>
+                      <h1 class="text-sm font-bold px-3">.</h1>
+                      <h1 class="text-sm">${post.updated_at}</h1> <!-- Date Display -->
+                  </div>
+                  <div class="md:px-3 md:py-1">
+                      <h1 class="text-lg">${post.summary}</h1>
+                  </div>
+                  <div class="md:px-3 md:py-1">`;
+
+        if (isLoggedIn) {
+          postDiv.innerHTML += `
+                      <button onclick="likePost(${post.post_id})" class="btn">Likes
+                          <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                          <div class="badge">${post.total_likes}</div>
+                      </button>
+                      <button class="btn" onclick="getComments(${post.post_id})">
+                          Comments
+                          <i class="fa fa-comments" aria-hidden="true"></i>
+                          <div class="badge">${post.total_comments}</div>
+                      </button>`;
+        }
+        postDiv.innerHTML += `
+                      <button onclick="goToPost(${post.post_id})" class="btn">
+                          Read More
+                          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                      </button>
+                      <button onclick="copyToClipboard(${post.post_id})" class="btn">
+                          Share
+                          <i class="fa fa-share" aria-hidden="true"></i>
+                      </button>
+                  </div>
+              </div>
+          </div>
+          <hr class="my-3"> <!-- Separator for posts -->
+        `;
+        postsContainer.appendChild(postDiv);
+      }
+    });
   });
 }
 
+
+var Post_id = 0;
+
+function getComments(post_id) {
+  CommentsModal.showModal();
+  Post_id = post_id;
+
+  $.ajax({
+    type: "POST",
+    url: "../Actions/comments.php",
+    data: {
+      action: "getComments",
+      post_id: post_id,
+    },
+    dataType: "json",
+    success: function (data) {
+      if (data.status === "success") {
+        displayComments(data.comments);
+      } else {
+        console.error("Error: " + data.message);
+      }
+    },
+    error: function (errorData) {
+      console.error(errorData);
+    },
+  });
+}
 
 function displayComments(comments) {
   const commentsContainer = $("#commentsContainer");
   commentsContainer.empty();
 
- 
   comments.forEach(function (comment) {
-      commentsContainer.append(`
+    commentsContainer.append(`
           <div class="outline outline-1 outline-gray-300 inline-block rounded-full px-5 py-3 my-2">
               <p class="block"><strong>${comment.full_name}</strong></p>
               <p class="block">${comment.content}</p>
@@ -163,75 +218,80 @@ function displayComments(comments) {
       `);
   });
 
-  commentsContainer.data('post_id', comments[0]?.post_id); 
+  commentsContainer.data("post_id", comments[0]?.post_id);
+  console.log(commentsContainer.data("post_id"));
 }
-
 
 // Function to add a new comment
 function addComment() {
   const commentsContainer = $("#commentsContainer");
-  const post_id = commentsContainer.data('post_id'); 
+  const post_id = Post_id;
   const commentText = $("#commentOnPost").val().trim();
 
   if (commentText === "") {
-      alert("Comment cannot be empty");
-      return;
+    alert("Comment cannot be empty");
+    return;
   }
 
   $.ajax({
-      type: "POST",
-      url: "../Actions/comments.php",
-      data: {
-          action: "addComment",
-          post_id: post_id,
-          content: commentText, // The comment text to be added
-      },
-      dataType: "json",
-      success: function (response) {
-          if (response.status === "success") {
-              displayComments(response.comments); // Update comments display with the new comment
-              $("#commentOnPost").val(""); // Clear the input field
-          } else {
-              console.error("Error adding comment: " + response.message); // Log error if the response is not successful
-          }
-      },
-      error: function (errorData) {
-          console.error("AJAX error: ", errorData); // Log any AJAX errors
-      },
+    type: "POST",
+    url: "../Actions/comments.php",
+    data: {
+      action: "addComment",
+      post_id: post_id,
+      content: commentText,
+    },
+    dataType: "json",
+    success: function (response) {
+      if (response.status === "success") {
+        $("#commentOnPost").val("");
+      } else {
+        console.error("Error adding comment: " + response.message);
+      }
+    },
+    error: function (errorData) {
+      console.error("AJAX error: ", errorData);
+    },
   });
 }
 
-
-
-
 function goToPost(post_id) {
   window.location.href = `blogPage.php?postId=${post_id}`;
-//   http://localhost/PHP/BlogSite/Pages/User/blogPage.php?postId=15
+  //   http://localhost/PHP/BlogSite/Pages/User/blogPage.php?postId=15
 }
 
 function copyToClipboard(post_id) {
   navigator.clipboard
-    .writeText(`http://localhost/PHP/BlogSite/Pages/User/blogPage.php?postId=${post_id}`)
+    .writeText(
+      `http://localhost/PHP/BlogSite/Pages/User/blogPage.php?postId=${post_id}`
+    )
     .then(() => {
       alert("Text copied to clipboard");
     })
     .catch((error) => {
       console.error("Error copying text to clipboard:", error);
     });
-  }
+}
 
+function likePost(post_id){
+  $.ajax({
+    url: "../Actions/addLike.php",
+    type: "POST",
+    dataType: "json",
+    data: {
+      action: "addLike",
+      post_id: post_id
+    },
+    success: function (data) {
+      if (data.isLoggedIn) {
 
-// function isLoggedIn() {
-//   // This could be replaced by an actual AJAX call to check session status.
-//   return !!sessionStorage.getItem("loggedIn"); // Assume you set 'loggedIn' in sessionStorage upon login.
-// }
-// sessionStorage.setItem("loggedIn", true);
-// console.log(isLoggedIn());
+      } else {
 
-// function displayComments(comments) {
-//   const commentsContainer = document.getElementById("commentsContainer");
-//   commentsContainer.innerHTML = "";
-
-//   comments.forEach((comment) => {
-//     let commentDiv = document.createElement("div");
-//     commentDiv.innerHTML = `
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error("Error:", error);
+      callback(false); 
+    },
+  });
+}

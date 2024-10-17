@@ -12,7 +12,6 @@
         { 
             if(!isset($this->db))
             { 
-                // Connect to the database 
                 try{ 
                     $conn = new PDO("mysql:host=".$this->dbHost.";dbname=".$this->dbName, $this->dbUsername, $this->dbPassword); 
                     $conn -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
@@ -23,6 +22,10 @@
                 } 
             } 
         } 
+
+        public function __destruct(){
+            $this->db = null;
+        }
 
         /*INSERT*/
         public function insert($table, $data)
@@ -63,17 +66,15 @@
 
                 foreach ($conditions as $key => $value) {
                     $pre = ($i > 0) ? ' AND ' : '';
-                    $whereSql .= $pre . $key . " = :".$key; // Use named placeholders
-                    $params[$key] = $value; // Store the values for binding
+                    $whereSql .= $pre . $key . " = :".$key;
+                    $params[$key] = $value;
                     $i++;
                 }
             }
 
             $sql = 'SELECT * FROM ' . $table . $whereSql;
             $statement = $this->db->prepare($sql);
-            $statement->execute($params); // Bind the parameters
-
-            // Fetch results
+            $statement->execute($params); 
             $users = $statement->fetchAll(PDO::FETCH_ASSOC);
 
             return !empty($users) ? $users : [];
@@ -83,19 +84,17 @@
 
         public function update($table, $data, $conditions) { 
             if (!empty($data) && is_array($data)) { 
-                // Prepare SET clause
                 $colvalSet = []; 
                 $whereSql = ''; 
-                $params = []; // Array for storing parameters for prepared statement
+                $params = [];
         
-                // Check if 'modified' is not present and set it
                 if (!array_key_exists('updated_at', $data)) { 
                     $data['updated_at'] = date("Y-m-d H:i:s"); 
                 }
         
                 foreach ($data as $key => $val) { 
-                    $colvalSet[] = "$key = :$key"; // Use named placeholders
-                    $params[":$key"] = $val; // Store the actual value for binding
+                    $colvalSet[] = "$key = :$key";
+                    $params[":$key"] = $val;
                 }
         
                 if (!empty($conditions) && is_array($conditions)) { 
@@ -104,8 +103,8 @@
         
                     foreach ($conditions as $key => $value) { 
                         $pre = ($i > 0) ? ' AND ' : ''; 
-                        $whereSql .= $pre . "$key = :cond_$key"; // Use named placeholders for conditions
-                        $params[":cond_$key"] = $value; // Store condition value for binding
+                        $whereSql .= $pre . "$key = :cond_$key";
+                        $params[":cond_$key"] = $value;
                         $i++; 
                     } 
                 } 
@@ -113,7 +112,6 @@
                 $sql = "UPDATE $table SET " . implode(', ', $colvalSet) . $whereSql; 
                 $query = $this->db->prepare($sql); 
         
-                // Execute the query with bound parameters
                 $update = $query->execute($params); 
                 return $update ? $query->rowCount() : false; 
             } else { 
@@ -130,8 +128,8 @@
                 $i = 0;
                 foreach ($conditions as $key => $value) {
                     $pre = ($i > 0) ? ' AND ' : '';
-                    $whereSql .= $pre . $key . " = :".$key;  // Use placeholders
-                    $params[$key] = $value;  // Bind values
+                    $whereSql .= $pre . $key . " = :".$key;
+                    $params[$key] = $value; 
                     $i++;
                 }
             }
@@ -148,19 +146,95 @@
             $whereSql = '';
             $params = [];
         
-            // Build the WHERE clause based on conditions
             if (!empty($conditions) && is_array($conditions)) {
                 $whereSql .= ' WHERE ';
                 $i = 0;
                 foreach ($conditions as $key => $value) {
                     $pre = ($i > 0) ? ' AND ' : '';
-                    $whereSql .= $pre . $key . " = :" . $key;  // Use placeholders
-                    $params[$key] = $value;  // Bind values
+                    $whereSql .= $pre . $key . " = :" . $key;
+                    $params[$key] = $value;
                     $i++;
                 }
             }
         
-            // SQL Query to get posts with likes and comments using LEFT JOIN
+            $sql = "
+                SELECT 
+                    p.id as post_id, 
+                    p.title, 
+                    p.category, 
+                    p.summary, 
+                    p.status, 
+                    p.content, 
+                    p.created_at, 
+                    p.updated_at, 
+                    p.img, 
+                    COUNT(DISTINCT(l.post_id)) AS total_likes,  -- Count distinct likes per post
+                    COUNT(DISTINCT(c.comment_id)) AS total_comments -- Count distinct comments per post
+                FROM $table p
+                LEFT JOIN likes l ON p.id = l.post_id  -- LEFT JOIN to include posts without likes
+                LEFT JOIN comments c ON p.id = c.post_id  -- LEFT JOIN to include posts without comments
+                $whereSql
+                GROUP BY p.id
+            ";
+        
+            $statement = $this->db->prepare($sql);
+            $statement->execute($params);
+        
+            // Fetch the result
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+
+        public function getPostCommentsWithAuthors($post_id) {
+            try {
+                $sql = "
+                    SELECT 
+                        c.comment_id, 
+                        c.post_id, 
+                        c.content, 
+                        c.created_at, 
+                        u.id AS user_id,          -- Alias to clarify which table the ID is from
+                        CONCAT(u.first_name, ' ', u.last_name) AS full_name,  -- Concatenate first and last name
+                        u.email                    -- Select additional user fields as needed
+                    FROM comments c
+                    LEFT JOIN users u ON c.user_id = u.id  -- Left join to include all comments regardless of user existence
+                    WHERE c.post_id = :post_id              -- Filter by post_id
+                    ORDER BY c.created_at DESC;             -- Optional: Order comments by creation date
+                ";
+    
+                $statement = $this->db->prepare($sql);
+                $statement->execute(['post_id' => $post_id]);
+        
+                return $statement->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                return [
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ];
+            } catch (Exception $e) {
+                return [
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ];
+            }
+        }
+
+
+        public function searchPost($table, $conditions) {
+            $whereSql = '';
+            $params = [];
+        
+            if (!empty($conditions) && is_array($conditions)) {
+                $whereSql .= ' WHERE ';
+                $i = 0;
+                foreach ($conditions as $key => $value) {
+                    $pre = ($i > 0) ? ' AND ' : '';
+                    $whereSql .= $pre . $key . " LIKE :" . $key;
+                    $params[$key] = '%' . $value . '%'; 
+                    $i++;
+                }
+            }
+        
             $sql = "
                 SELECT 
                     p.id as post_id, 
@@ -183,48 +257,8 @@
         
             $statement = $this->db->prepare($sql);
             $statement->execute($params);
-        
-            // Fetch the result
+    
             return $statement->fetchAll(PDO::FETCH_ASSOC);
-        }
-
-
-        public function getPostCommentsWithAuthors($post_id) {
-            try {
-                // SQL Query to get all comments associated with a post and their author information
-                $sql = "
-                    SELECT 
-                        c.comment_id, 
-                        c.post_id, 
-                        c.content, 
-                        c.created_at, 
-                        u.id AS user_id,          -- Alias to clarify which table the ID is from
-                        CONCAT(u.first_name, ' ', u.last_name) AS full_name,  -- Concatenate first and last name
-                        u.email                    -- Select additional user fields as needed
-                    FROM comments c
-                    LEFT JOIN users u ON c.user_id = u.id  -- Left join to include all comments regardless of user existence
-                    WHERE c.post_id = :post_id              -- Filter by post_id
-                    ORDER BY c.created_at DESC;             -- Optional: Order comments by creation date
-                ";
-        
-                // Prepare and execute the statement
-                $statement = $this->db->prepare($sql);
-                $statement->execute(['post_id' => $post_id]);
-        
-                // Fetch the result
-                return $statement->fetchAll(PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                return [
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ];
-            } catch (Exception $e) {
-                // Handle any other exceptions
-                return [
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ];
-            }
         }
         
         
