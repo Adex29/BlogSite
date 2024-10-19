@@ -21,7 +21,7 @@
             </div>
             <div class="d-flex">
                 <div class="col-4 position-relative">
-                    <input type="text" placeholder="Search" class="form-control" id="searchInput">
+                    <input type="text" placeholder="Search" class="form-control" id="searchInputUser">
                     <span class="clear-search" id="clearSearch"><i class="fa fa-times" aria-hidden="true"></i></span>
                 </div>
                 <div class="col-2 px-3">

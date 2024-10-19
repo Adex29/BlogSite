@@ -6,7 +6,6 @@ header('Content-Type: application/json');
 if (isset($_POST['action']) && $_POST['action'] === 'getSession') {
     if (isset($_SESSION['isLoggedIn']) && $_SESSION['isLoggedIn'] === true) {
         echo json_encode([
-            // 'email' => $_SESSION['email'],
             'isLoggedIn' => true,
             'status' => 'success'
         ]);

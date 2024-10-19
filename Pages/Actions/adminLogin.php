@@ -24,10 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($user) {
             $hashedPassword = $user[0]['password'];
             $userRole = $user[0]['role'];
-
             if (password_verify($password, $hashedPassword)) {
                 if ($userRole === 'admin') {
-                    $_SESSION['loggedIn'] = true;
+                    $_SESSION['isLoggedIn'] = true;
                     $_SESSION['userId'] = $user[0]['id'];
                     $_SESSION['role'] = 'admin';
 
@@ -39,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     ]);
 
                 } elseif ($userRole === 'user') {
-                    $_SESSION['loggedIn'] = true;
+                    $_SESSION['isLoggedIn'] = true;
                     $_SESSION['userId'] = $user[0]['id'];
                     $_SESSION['role'] = 'user';
 

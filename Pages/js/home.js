@@ -21,7 +21,7 @@ function checkSessionStatus(callback) {
     },
     error: function (xhr, status, error) {
       console.error("Error:", error);
-      callback(false); // Pass false to callback on error
+      callback(false);
     },
   });
 }
@@ -146,6 +146,7 @@ function displayPosts(posts) {
                   <div class="md:px-3 md:py-1">`;
 
         if (isLoggedIn) {
+          console.log(isLoggedIn);
           postDiv.innerHTML += `
                       <button onclick="likePost(${post.post_id})" class="btn">Likes
                           <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
@@ -222,9 +223,12 @@ function displayComments(comments) {
   console.log(commentsContainer.data("post_id"));
 }
 
-// Function to add a new comment
+
+function hideModal() {
+  $('#CommentsModal').addClass('hidden');
+}
+
 function addComment() {
-  const commentsContainer = $("#commentsContainer");
   const post_id = Post_id;
   const commentText = $("#commentOnPost").val().trim();
 
@@ -244,7 +248,9 @@ function addComment() {
     dataType: "json",
     success: function (response) {
       if (response.status === "success") {
+        hideModal();
         $("#commentOnPost").val("");
+        fetchPosts();
       } else {
         console.error("Error adding comment: " + response.message);
       }
@@ -255,9 +261,13 @@ function addComment() {
   });
 }
 
+
+document.getElementById('closeModal').addEventListener('click', hideModal);
+
+
 function goToPost(post_id) {
   window.location.href = `blogPage.php?postId=${post_id}`;
-  //   http://localhost/PHP/BlogSite/Pages/User/blogPage.php?postId=15
+
 }
 
 function copyToClipboard(post_id) {
@@ -273,7 +283,8 @@ function copyToClipboard(post_id) {
     });
 }
 
-function likePost(post_id){
+function likePost(post_id) {
+  console.log(post_id);
   $.ajax({
     url: "../Actions/addLike.php",
     type: "POST",
@@ -283,15 +294,16 @@ function likePost(post_id){
       post_id: post_id
     },
     success: function (data) {
-      if (data.isLoggedIn) {
-
+      if (data.status === "success") {
+        alert(data.message); // Display success message
+        // Optionally update the UI here (e.g., increment like count)
       } else {
-
+        console.error("Error:", data.message);
       }
     },
     error: function (xhr, status, error) {
       console.error("Error:", error);
-      callback(false); 
+      // Optional: handle error appropriately
     },
   });
 }
