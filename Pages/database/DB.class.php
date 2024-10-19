@@ -72,7 +72,7 @@
                 }
             }
 
-            $sql = 'SELECT * FROM ' . $table . $whereSql;
+            $sql = 'SELECT * FROM ' . $table . $whereSql . ' ORDER BY created_at DESC';
             $statement = $this->db->prepare($sql);
             $statement->execute($params); 
             $users = $statement->fetchAll(PDO::FETCH_ASSOC);
@@ -167,12 +167,13 @@
                     p.content, 
                     p.created_at, 
                     p.updated_at, 
-                    p.img, 
-                    COUNT(DISTINCT(l.post_id)) AS total_likes,  -- Count distinct likes per post
-                    COUNT(DISTINCT(c.comment_id)) AS total_comments -- Count distinct comments per post
+                    p.img,
+                    p.author,
+                    (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS total_likes,  
+                    (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS total_comments
                 FROM $table p
-                LEFT JOIN likes l ON p.id = l.post_id  -- LEFT JOIN to include posts without likes
-                LEFT JOIN comments c ON p.id = c.post_id  -- LEFT JOIN to include posts without comments
+                LEFT JOIN likes l ON p.id = l.post_id
+                LEFT JOIN comments c ON p.id = c.post_id
                 $whereSql
                 GROUP BY p.id
             ";
@@ -193,13 +194,13 @@
                         c.post_id, 
                         c.content, 
                         c.created_at, 
-                        u.id AS user_id,          -- Alias to clarify which table the ID is from
-                        CONCAT(u.first_name, ' ', u.last_name) AS full_name,  -- Concatenate first and last name
-                        u.email                    -- Select additional user fields as needed
+                        u.id AS user_id,    
+                        CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                        u.email   
                     FROM comments c
-                    LEFT JOIN users u ON c.user_id = u.id  -- Left join to include all comments regardless of user existence
-                    WHERE c.post_id = :post_id              -- Filter by post_id
-                    ORDER BY c.created_at DESC;             -- Optional: Order comments by creation date
+                    LEFT JOIN users u ON c.user_id = u.id 
+                    WHERE c.post_id = :post_id
+                    ORDER BY c.created_at DESC;
                 ";
     
                 $statement = $this->db->prepare($sql);

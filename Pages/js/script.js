@@ -2,6 +2,7 @@ $(document).ready(function () {
 const usersTable = $("#usersTable").DataTable({
   paging: false,
   scrollY: "400px", 
+  "dom":"lrtip",
   scrollCollapse: true,
   ajax: {
     url: "../Actions/dashBoard.php",
@@ -44,6 +45,11 @@ $('#searchInputUser').on('keyup', function () {
   usersTable.search(this.value).draw();
 });
 
+$('#clearUserSearch').on('click', function () {
+  $('#searchInputUser').val('').trigger('input');
+  usersTable.search('').draw();
+});
+
 
   $("#commentsTable").DataTable({
     columns: [
@@ -56,8 +62,8 @@ $('#searchInputUser').on('keyup', function () {
   });
 
   // Initialize the posts DataTable
-  $("#postsTable").DataTable({
-    searching: false,
+  const postsTable = $("#postsTable").DataTable({
+    "dom":"lrtip",
     paging: false,
     scrollY: "400px",
     scrollCollapse: true,
@@ -120,10 +126,13 @@ $('#searchInputUser').on('keyup', function () {
     ],
   });
 
-  $("#mediaTable").DataTable({
-    columns: [{ title: "Title" }, { title: "Type" }, { title: "Actions" }],
+  $('#searchPostsInput').on('keyup', function () {
+    postsTable.search(this.value).draw();
+  });
 
-    paging: false,
+  $('#clearPostsSearch').on('click', function () {
+    $('#clearPostsSearch').val('').trigger('input');
+    postsTable.search('').draw();
   });
 
   const $carousel = $("#carouselExampleSlidesOnly");

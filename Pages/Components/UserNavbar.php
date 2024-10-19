@@ -1,6 +1,6 @@
 <?php 
 
-if(isset($_SESSION)){
+if(!isset($_SESSION)){
   session_start();
 }
 ?>
@@ -18,19 +18,18 @@ if(isset($_SESSION)){
         <div class="w-10 rounded-full">
           <img
             alt="User Avatar"
-            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+            src="../images/noaim.jpg" />
         </div>
       </div>
       <ul
         tabindex="0"
         class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
         
-        <?php if (!isset($_SESSION['isLoggedIn'])): ?>
+        <?php if (isset($_SESSION['isLoggedIn'])): ?>
           <li><a href="../Components/logout.php">Logout</a></li>
         <?php else: ?>
           <li><a href="Login.php">Login</a></li>
         <?php endif; ?>
-
       </ul>
     </div>
   </div>

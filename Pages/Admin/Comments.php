@@ -26,9 +26,9 @@
                         <option value="pending">Pending</option>
                     </select>
                 </div>
-                <div class="ml-auto">
+                <!-- <div class="ml-auto">
                     <button class="btn btn-primary align-self-end" data-bs-toggle="modal" data-bs-target="#commentModal">Add Comment</button>
-                </div>
+                </div> -->
             </div>
 
             <div id="commentsTableContainer">

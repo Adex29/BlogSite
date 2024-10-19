@@ -1,7 +1,7 @@
 <?php include_once("../Components/UserHeader.php"); ?>
 <?php include_once("../Components/UserNavbar.php"); ?>
 <?php 
-    session_start();
+
 ?>
 <div class="wrapper">
     <div class="md:flex md:items-start">

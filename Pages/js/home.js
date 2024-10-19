@@ -136,7 +136,7 @@ function displayPosts(posts) {
                       <h1 class="text-3xl font-bold">${post.title}</h1>
                   </div>
                   <div class="flex md:px-3">
-                      <h1 class="text-sm">Jay-ar Baniqued</h1>
+                      <h1 class="text-sm">${post.author}</h1>
                       <h1 class="text-sm font-bold px-3">.</h1>
                       <h1 class="text-sm">${post.updated_at}</h1> <!-- Date Display -->
                   </div>
@@ -150,12 +150,12 @@ function displayPosts(posts) {
           postDiv.innerHTML += `
                       <button onclick="likePost(${post.post_id})" class="btn">Likes
                           <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                          <div class="badge">${post.total_likes}</div>
+                          <div id="likeCount${post.post_id}" class="badge">${post.total_likes}</div>
                       </button>
                       <button class="btn" onclick="getComments(${post.post_id})">
                           Comments
                           <i class="fa fa-comments" aria-hidden="true"></i>
-                          <div class="badge">${post.total_comments}</div>
+                          <div id="commentCount${post.post_id}" class="badge">${post.total_comments}</div>
                       </button>`;
         }
         postDiv.innerHTML += `
@@ -224,10 +224,6 @@ function displayComments(comments) {
 }
 
 
-function hideModal() {
-  $('#CommentsModal').addClass('hidden');
-}
-
 function addComment() {
   const post_id = Post_id;
   const commentText = $("#commentOnPost").val().trim();
@@ -248,9 +244,16 @@ function addComment() {
     dataType: "json",
     success: function (response) {
       if (response.status === "success") {
-        hideModal();
+        // document.getElementById("CommentsModal").close();
+        $("#commentsContainer").append(`
+          <div class="outline outline-1 outline-gray-300 inline-block rounded-full px-5 py-3 my-2">
+              <p class="block"><strong>${response.full_name}</strong></p>
+              <p class="block">${$("#commentOnPost").val()}</p>
+          </div>
+        `);
         $("#commentOnPost").val("");
-        fetchPosts();
+        var commentsCount = Number($(`#commentCount${post_id}`).text());
+        $(`#commentCount${post_id}`).text(commentsCount + 1);
       } else {
         console.error("Error adding comment: " + response.message);
       }
@@ -284,7 +287,6 @@ function copyToClipboard(post_id) {
 }
 
 function likePost(post_id) {
-  console.log(post_id);
   $.ajax({
     url: "../Actions/addLike.php",
     type: "POST",
@@ -295,15 +297,15 @@ function likePost(post_id) {
     },
     success: function (data) {
       if (data.status === "success") {
-        alert(data.message); // Display success message
-        // Optionally update the UI here (e.g., increment like count)
+        const likeCountElement = $(`#likeCount${post_id}`);
+        const newLikeCount = Number(likeCountElement.text()) + 1;
+        likeCountElement.text(newLikeCount);
       } else {
         console.error("Error:", data.message);
       }
     },
     error: function (xhr, status, error) {
       console.error("Error:", error);
-      // Optional: handle error appropriately
     },
   });
 }

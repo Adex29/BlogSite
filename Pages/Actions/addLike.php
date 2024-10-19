@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)){
+    session_start();
+  }
 
 include_once("../database/DB.class.php");
 
@@ -15,18 +17,11 @@ if (isset($_POST['action'])) {
                 'post_id' => $post_id,
                 'user_id' => $_SESSION['userId']
             ]);
-
-            if ($result) {
                 echo json_encode([
                     "status" => "success",
                     "message" => "Post liked successfully."
                 ]);
-            } else {
-                echo json_encode([
-                    "status" => "error",
-                    "message" => "Failed to like the post."
-                ]);
-            }
+        
         } catch (Exception $e) {
             echo json_encode([
                 "status" => "error",

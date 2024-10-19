@@ -1,7 +1,9 @@
 <?php
-session_start();
+if(!isset($_SESSION)){
+    session_start();
+  }
 
-if (!isset($_SESSION['loggedIn'])) {
+if (!isset($_SESSION['isLoggedIn']) || $_SESSION['isLoggedIn'] !== true) {
     header("location: ../Admin/Login.php");
     exit();
 }
