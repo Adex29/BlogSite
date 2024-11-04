@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $_SESSION['isLoggedIn'] = true;
                     $_SESSION['userId'] = $user[0]['id'];
                     $_SESSION['role'] = 'admin';
+                    $_SESSION['name'] = $user[0]['first_name'] . ' ' . $user[0]['last_name'];
 
                     echo json_encode([
                         "status" => "success",
