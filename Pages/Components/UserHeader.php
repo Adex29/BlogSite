@@ -30,6 +30,10 @@
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 
     <script src="../js/script.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+
+    
 
 </head>
 
