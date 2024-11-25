@@ -13,6 +13,8 @@ error_reporting(E_ALL);
 
 ob_start(); // Start output buffering
 
+use Facebook\Facebook;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -24,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm_password'];
 
-            // Validate input
             if (empty($first_name) || empty($last_name) || empty($email) || empty($password) || empty($confirm_password)) {
                 echo json_encode([
                     "status" => "error",
@@ -33,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
 
-            // Check if passwords match
             if ($password !== $confirm_password) {
                 echo json_encode([
                     "status" => "error",
@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $db = new DB();
 
-            // Check if the email already exists
             $existingUser = $db->getRows('users', ['email' => $email]);
 
             if ($existingUser) {
@@ -55,10 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
 
-            // Hash the password
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            // Insert the new user into the database
             $data = [
                 'first_name' => $first_name,
                 'last_name' => $last_name,
@@ -162,11 +159,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+
+    
+    if ($action === 'FacebookSignUp') {
+        try {
+            $access_token = $_POST['access_token'] ?? '';
+
+            if (empty($access_token)) {
+                echo json_encode([
+                    "status" => "error",
+                    "message" => "Access token is missing.",
+                ]);
+                exit();
+            }
+
+            $url = "https://graph.facebook.com/me?access_token=" . $access_token . "&fields=id,first_name,last_name,email";
+            $response = file_get_contents($url);
+            $facebook_data = json_decode($response, true);
+
+            if (isset($facebook_data['error'])) {
+                echo json_encode([
+                    "status" => "error",
+                    "message" => "Invalid Facebook access token.",
+                ]);
+                exit();
+            }
+
+            $facebook_id = $facebook_data['id'];
+            $first_name = $facebook_data['first_name'];
+            $last_name = $facebook_data['last_name'];
+            $email = $facebook_data['email'];
+
+            $db = new DB();
+            $existingUser = $db->getRows('users', ['email' => $email]);
+
+            if ($existingUser) {
+                echo json_encode([
+                    "status" => "success",
+                    "message" => "User already exists. Redirecting...",
+                    "redirectUrl" => "../User/Login.php",
+                ]);
+                exit();
+            } else {
+                $data = [
+                    'first_name' => $first_name,
+                    'last_name' => $last_name,
+                    'email' => $email,
+                    'role' => 'user',
+                    'method' => 'facebook'
+                ];
+
+                if ($db->insert('users', $data)) {
+                    echo json_encode([
+                        "status" => "success",
+                        "message" => "Sign-up successful. Redirecting...",
+                        "redirectUrl" => "../User/Login.php",
+                    ]);
+                    exit();
+                } else {
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "An error occurred while creating the account.",
+                    ]);
+                    exit();
+                }
+            }
+        } catch (Exception $e) {
+            echo json_encode([
+                "status" => "error",
+                "message" => "An error occurred: " . $e->getMessage(),
+            ]);
+            exit();
+        }
+    }
+    
+
     echo json_encode([
         "status" => "error",
         "message" => "Invalid request.",
     ]);
     exit();
 }
-
 ?>

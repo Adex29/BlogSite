@@ -1,7 +1,7 @@
 <div>
     <div class="container">
         <div class="row justify-content-center align-items-center mt-5">
-            <div class="col-4 ">
+            <div class=" col-md-5 col-sm-8">
                 <div class="card bg-light">
                     <div class="card-body">
                         <div id="error"></div>
@@ -27,8 +27,8 @@
                         </div>
 
 
-                        <div class="form-group text-center mt-4">
-                        <div class="fb-login-button" data-width="" data-size="" data-button-type="" data-layout="" data-auto-logout-link="false" data-use-continue-as="false"></div>
+                        <div class="form-group d-grid gap-2 text-center mt-3">
+                            <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="true" onlogin="checkLoginState()" scope="public_profile"></div>
                             <div>
                                 <div id="g_id_onload"
                                     data-client_id="286853462386-49vh36onqvjfej8l121pu3h90uh3pk3v.apps.googleusercontent.com"
