@@ -145,7 +145,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'FacebookSignIn') {
             $_SESSION['role'] = $user[0]['role'];
             $_SESSION['name'] = $user[0]['first_name'] . ' ' . $user[0]['last_name'];
 
-            $redirectUrl = "../User/homePage.php";
+            $redirectUrl = ($user[0]['role'] === 'admin') ? "../Admin/MainDashboard.php" : "../User/homePage.php";
 
             echo json_encode([
                 "status" => "success",

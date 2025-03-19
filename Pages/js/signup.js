@@ -10,17 +10,17 @@ $(document).ready(function () {
       formData[item.name] = item.value;
     });
 
-    formData["action"] = "SignUp"; // Set action to SignUp
+    formData["action"] = "SignUp"; 
 
     try {
       $.ajax({
         type: "POST",
-        url: "../Actions/signup.php", // URL to the sign-up PHP file
+        url: "../Actions/signup.php",
         data: formData,
         dataType: "json",
         success: function (response) {
           if (response.status === "success") {
-            window.location.href = response.redirectUrl; // Redirect on successful sign-up
+            window.location.href = response.redirectUrl; 
           } else {
             $("#error").html(`
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -52,7 +52,7 @@ $(document).ready(function () {
 
 function decodeJwtResponse(jwt) {
   const base64Url = jwt.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/"); // Replacing URL-safe characters
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
   const jsonPayload = decodeURIComponent(
     atob(base64)
       .split("")
@@ -90,13 +90,13 @@ function googleAuth(response) {
       if (response.status === "success") {
         $("#error").html(`
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Error!</strong> ${response.message}
+                <strong>Success!</strong> ${response.message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `);
         setTimeout(function () {
           window.location.href = response.redirectUrl;
-        }, 3000);
+        }, 2000);
       } else {
         $("#error").html(`
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -153,13 +153,13 @@ function statusChangeCallback(response , token) {
                     if (response.status === "success") {
                         $("#error").html(`
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <strong>Error!</strong> ${response.message} 
+                                <strong>Success!</strong> ${response.message} 
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         `);
                         setTimeout(function () {
                           window.location.href = response.redirectUrl;
-                        }, 5000);
+                        }, 2000);
                     } else {
                         $("#error").html(`
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">

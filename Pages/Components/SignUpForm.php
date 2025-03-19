@@ -1,7 +1,7 @@
 <div>
     <div class="container">
         <div class="row justify-content-center align-items-center mt-5">
-            <div class="col-md-4">
+            <div class="col-md-5 col-sm-8">
                 <div class="card bg-light">
                     <div class="card-body">
                         <div id="error"></div>
@@ -37,13 +37,14 @@
                             <p class="mx-3 mb-0">or</p>
                             <hr class="flex-grow-1">
                         </div>
-                        <div class="form-group text-center mt-4">
+                        <div class="d-flex flex-column align-items-center mt-3">
                             <!-- <button type="submit" class="btn btn-outline-primary rounded-circle social-btn">
                                 <i class="fa fa-facebook" aria-hidden="true"></i>
                             </button> -->
                             <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="true" onlogin="checkLoginState()" scope="public_profile">></div>
 
-                            <div id="g_id_onload"
+                            <div class="mt-2"
+                                id="g_id_onload"
                                 data-client_id="286853462386-49vh36onqvjfej8l121pu3h90uh3pk3v.apps.googleusercontent.com"
                                 data-context="signup"
                                 data-ux_mode="popup"
@@ -52,8 +53,8 @@
                             </div>
 
                             <div class="g_id_signin"
-                                data-type="icon"
-                                data-shape="circle"
+                                data-type="standard"
+                                data-shape="rectangular"
                                 data-theme="outline"
                                 data-text="signin_with"
                                 data-size="large">

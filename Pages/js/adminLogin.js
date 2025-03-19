@@ -71,13 +71,21 @@ function handleGoogleSignIn(response) {
     url: "../Actions/adminLogin.php",
     data: { idToken },
     dataType: "json",
-    success: function (res) {
-      if (res.status === "success") {
-        window.location.href = res.redirectUrl;
+    success: function (response) {
+      if (response.status === "success") {
+        $("#error").html(`
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <strong>Success!</strong> ${response.message} 
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+      `);
+        setTimeout(function () {
+          window.location.href = response.redirectUrl;
+        }, 3000);
       } else {
         $("#error").html(`
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Error!</strong> ${res.message}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Success!</strong> ${response.message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 `);
@@ -110,11 +118,11 @@ window.fbAsyncInit = function () {
 function checkLoginState() {
   FB.getLoginStatus(function (response) {
     var token = response.authResponse.accessToken;
-    statusChangeCallback(response, token);
+    loginFacebook(response, token);
   });
 }
 
-function statusChangeCallback(response, token) {
+function loginFacebook(response, token) {
   if (response.status === "connected") {
     FB.api(
       "/me",
@@ -133,13 +141,13 @@ function statusChangeCallback(response, token) {
             if (response.status === "success") {
               $("#error").html(`
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <strong>Error!</strong> ${response.message} 
+                                <strong>Success!</strong> ${response.message} 
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         `);
               setTimeout(function () {
                 window.location.href = response.redirectUrl;
-              }, 1000);
+              }, 3000);
             } else {
               $("#error").html(`
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">

@@ -8,7 +8,7 @@
         <div class=" md:w-4/5">
             <div id="postsContainer">
             </div>
-            <!-- <div id="postsContainer">
+            <div id="postsContainer">
                 <div class="md:flex">
                     <div class="w-full md:w-64 h-64 flex-shrink-0">
                         <img src="https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg" alt="" class="w-full h-full object-cover">
@@ -79,7 +79,7 @@
                     </div>
 
                 </div>
-            </div> -->
+            </div>
 
         </div>
 
